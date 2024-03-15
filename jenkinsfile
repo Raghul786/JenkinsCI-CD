@@ -1,0 +1,44 @@
+// Pipeline job using a shared library
+pipeline {
+    agent any
+
+    environment {
+        // Set credentials environment variables
+        CREDENTIALS_ID_TEST = "test-repo-credentials"
+        CREDENTIALS_ID_PROD = "prod-repo-credentials"
+    }
+
+    stages {
+        stage('Push to Test') {
+            when {
+                branch 'test' // Trigger job only on pushes to the 'test' branch
+            }
+            steps {
+                script {
+                    // Call the deployment function from the shared library
+                    deploy(
+                        repoUrl: 'https://github.com/your-username/your-test-repo.git', // Replace with your Git repository URL
+                        credentialsId: env.CREDENTIALS_ID_TEST,
+                        branch: 'test',
+                        server: 'test-server-address' // Replace with your test server details
+                    )
+                }
+            }
+        }
+        stage('Push to Prod') {
+            when {
+                branch 'master' // Trigger job only on pushes to the 'master' branch
+            }
+            steps {
+                script {
+                    deploy(
+                        repoUrl: 'https://github.com/your-username/your-prod-repo.git', // Replace with your Git repository URL
+                        credentialsId: env.CREDENTIALS_ID_PROD,
+                        branch: 'master',
+                        server: 'prod-server-address' // Replace with your production server details
+                    )
+                }
+            }
+        }
+    }
+}
